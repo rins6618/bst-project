@@ -178,43 +178,45 @@ class Tree {
         return null;
     }
 
-    /** @param {(v: BSTNode<T>) => void} callback  */
+    /** @param {(val: T, node: BSTNode<T>, i: number) => void} callback  */
     levelOrder(callback) {
         if (typeof callback !== 'function') {
             throw new TypeError("No callback provided");
         }
 
         const queue = [this.root];
+        let i = 0;
         while (queue.length !== 0) {
             const node = queue.shift();
             if (node == null) continue;
             queue.push(node.left, node.right);
-            callback(node);
+            callback(node.value, node, i);
+            i++;
         }
     }
 
-    /** @param {(v: BSTNode<T>) => void} callback  */
+    /** @param {(val: T, node: BSTNode<T>, i: number) => void} callback  */
     inOrder(callback) { this.#xOrder(callback, 'in'); }
 
-    /** @param {(v: BSTNode<T>) => void} callback  */
+    /** @param {(val: T, node: BSTNode<T>, i: number) => void} callback  */
     preOrder(callback) { this.#xOrder(callback, 'pre'); }
 
-    /** @param {(v: BSTNode<T>) => void} callback  */
+    /** @param {(val: T, node: BSTNode<T>, i: number) => void} callback  */
     postOrder(callback) { this.#xOrder(callback, 'post'); }
 
     /**
-     * @param {(v: BSTNode<T>) => void} callback 
+     * @param {(val: T, node: BSTNode<T>, i: number) => void} callback 
      * @param {'post' | 'pre' | 'in'} method 
      */
     #xOrder(callback, method) {
         const stack = [];
         let viewed = this.root;
         let prev = null;
-
+        let i = 0;
         while ((stack.length) != 0 || viewed != null) {
             if (method === 'pre') {
                 if (viewed != null) {
-                    callback(viewed);
+                    callback(viewed.value, viewed, i);
                     if (viewed.right != null) {
                         stack.push(viewed.right);
                     }
@@ -228,7 +230,7 @@ class Tree {
                     viewed = viewed.left;
                 } else {
                     viewed = stack.pop();
-                    callback(viewed);
+                    callback(viewed.value, viewed, i);
                     viewed = viewed.right;
                 }
             } else {
@@ -241,10 +243,11 @@ class Tree {
                     if (top.right != null && !Object.is(top.right, prev)) {
                         viewed = top.right;
                     } else {
-                        callback(top);
+                        callback(top.value, top, i);
                         prev = stack.pop();
                     }
                 }
+                i++;
             }
         } 
     }
@@ -293,7 +296,7 @@ class Tree {
 
     rebalance() {
         const arr = [];
-        this.inOrder((val) => { arr.push(val.value) });
+        this.inOrder((val) => { arr.push(val) });
         this.root = buildTree(arr);
     }
 }
@@ -314,60 +317,64 @@ function prettyPrint (node, prefix = "", isLeft = true) {
     }
 };
 
-/** @param {string} title */
-const separator = (n, title) => {
-    n *= 4;
-    console.log('='.repeat(n));
-    console.log(title.padStart((title.length + n) / 2, '~').padEnd(n, '~'));
-    console.log('='.repeat(n));
-};
 
-const tree = new Tree([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324]);
-prettyPrint(tree.root);
+/*
+1. Create a binary search tree from an array of random numbers < 100. X
+    - You can create a function that returns an array of 
+      random numbers every time you call it if you wish.
+2. Confirm that the tree is balanced by calling isBalanced. X
+3. Print out all elements in level, pre, post, and in order.
+4. Unbalance the tree by adding several numbers > 100.
+5. Confirm that the tree is unbalanced by calling isBalanced.
+6. Balance the tree by calling rebalance.
+7. Confirm that the tree is balanced by calling isBalanced.
+8. Print out all elements in level, pre, post, and in order. 
+*/
 
-separator(12, 'Inserting');
-tree.insert(144);
-prettyPrint(tree.root);
+// Ad-hoc
+/** @param {number} size */
+const randomHelper = (size) => {
+    const arr = [];
+    while (size-- > 0) {       
+        arr.push(Math.round(Math.random() * 100));
+    }
+    return arr;
+}
 
-separator(12, 'Deleting');
-tree.removeValue(144);
-prettyPrint(tree.root);
+const tree = new Tree(randomHelper(24));
+console.log(`Is tree balanced? ${tree.isBalanced()}`);
 
-separator(12, 'Finding');
-prettyPrint(tree.find(67));
+let aux = [];
+tree.levelOrder((v) => aux.push(v));
+console.log(`Level order: [${aux.toString()}]`);
+aux = [];
+tree.preOrder((v) => aux.push(v));
+console.log(`Pre order: [${aux.toString()}]`);
+aux = [];
+tree.inOrder((v) => aux.push(v));
+console.log(`In order: [${aux.toString()}]`);
+aux = [];
+tree.postOrder((v) => aux.push(v));
+console.log(`Post order: [${aux.toString()}]`);
 
-separator(12, 'Level Order, Pre/In/Postorder');
-prettyPrint(tree.root);
-tree.levelOrder((v) => {stdout.write(v.value + ' => ')})
-console.log();
-tree.inOrder((v) => {stdout.write(v.value + ' => ')})
-console.log();
-tree.preOrder((v) => {stdout.write(v.value + ' => ')})
-console.log();
-tree.postOrder((v) => {stdout.write(v.value + ' => ')})
-console.log();
-
-separator(12, 'Height');
-prettyPrint(tree.find(67));
-console.log(tree.height(67));
-
-separator(12, 'Depth');
-prettyPrint(tree.root);
-console.log(tree.depth(67));
-
-separator(12, 'Is balanced');
-prettyPrint(tree.root);
-console.log(tree.isBalanced());
-tree.insert(144);
-tree.insert(81);
-tree.insert(36);
-prettyPrint(tree.root);
-console.log(tree.isBalanced());
-
-separator(12, 'Rebalancing');
-console.log(`Is balanced? ${tree.isBalanced()}`);
-prettyPrint(tree.root);
+console.log("Adding ~10 elements");
+randomHelper(10).forEach((val) => tree.insert(val));
+console.log(`Is tree balanced? ${tree.isBalanced()}`);
+console.log(tree.height(tree.root.value));
+console.log("Balancing");
 tree.rebalance();
-console.log();
-console.log(`\n\nIs balanced? ${tree.isBalanced()}`);
-prettyPrint(tree.root);
+console.log(`Is tree balanced? ${tree.isBalanced()}`);
+console.log(tree.height(tree.root.value));
+
+aux = [];
+tree.levelOrder((v) => aux.push(v));
+console.log(`Level order: [${aux.toString()}]`);
+aux = [];
+tree.preOrder((v) => aux.push(v));
+console.log(`Pre order: [${aux.toString()}]`);
+aux = [];
+tree.inOrder((v) => aux.push(v));
+console.log(`In order: [${aux.toString()}]`);
+aux = [];
+tree.postOrder((v) => aux.push(v));
+console.log(`Post order: [${aux.toString()}]`);
