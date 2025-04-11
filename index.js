@@ -248,6 +248,37 @@ class Tree {
             }
         } 
     }
+
+    /** @param {T} value  */
+    height(value) {
+        const node = this.find(value);
+        if (node == null) return null;
+        return this.#heightNode(node);
+    }
+
+    /** @param {BSTNode<T> | null} node  */
+    #heightNode(node) {
+        if (node == null) return -1;
+        return Math.max(-1, Math.max(1 + this.#heightNode(node.left), 1 + this.#heightNode(node.right)));
+    }
+    
+    /** @param {T} value  */
+    depth(value) {
+        const node = this.find(value);
+        if (node == null) return null;
+        
+        let view = this.root;
+        let depth = 0;
+        while (!Object.is(view, node)) {
+            if (node.value > view.value) {
+                view = view.right;
+            } else {
+                view = view.left;
+            }
+            depth += 1;
+        }
+        return depth;
+    }
 }
 
 /** 
@@ -268,7 +299,6 @@ function prettyPrint (node, prefix = "", isLeft = true) {
 
 /** @param {string} title */
 const separator = (n, title) => {
-    const SIZE = 4;
     n *= 4;
     console.log('='.repeat(n));
     console.log(title.padStart((title.length + n) / 2, '~').padEnd(n, '~'));
@@ -299,3 +329,12 @@ tree.preOrder((v) => {stdout.write(v.value + ' => ')})
 console.log();
 tree.postOrder((v) => {stdout.write(v.value + ' => ')})
 console.log();
+
+separator(12, 'Height');
+prettyPrint(tree.find(67));
+console.log(tree.height(67));
+
+separator(12, 'Depth');
+prettyPrint(tree.root);
+console.log(tree.depth(67));
+
