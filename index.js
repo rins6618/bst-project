@@ -290,6 +290,12 @@ class Tree {
         const subtrees = Math.abs(this.#heightNode(node.left) - this.#heightNode(node.right)) <= 1; 
         return subtrees && this.#isNodeBalanced(node.left) && this.#isNodeBalanced(node.right);   
     }
+
+    rebalance() {
+        const arr = [];
+        this.inOrder((val) => { arr.push(val.value) });
+        this.root = buildTree(arr);
+    }
 }
 
 /** 
@@ -357,3 +363,11 @@ tree.insert(81);
 tree.insert(36);
 prettyPrint(tree.root);
 console.log(tree.isBalanced());
+
+separator(12, 'Rebalancing');
+console.log(`Is balanced? ${tree.isBalanced()}`);
+prettyPrint(tree.root);
+tree.rebalance();
+console.log();
+console.log(`\n\nIs balanced? ${tree.isBalanced()}`);
+prettyPrint(tree.root);
