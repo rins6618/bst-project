@@ -279,6 +279,17 @@ class Tree {
         }
         return depth;
     }
+
+    isBalanced() {
+        return this.#isNodeBalanced(this.root);
+    }
+
+    /** @param {BSTNode<T> | null} node  */
+    #isNodeBalanced(node) {
+        if (node == null) return true;
+        const subtrees = Math.abs(this.#heightNode(node.left) - this.#heightNode(node.right)) <= 1; 
+        return subtrees && this.#isNodeBalanced(node.left) && this.#isNodeBalanced(node.right);   
+    }
 }
 
 /** 
@@ -338,3 +349,11 @@ separator(12, 'Depth');
 prettyPrint(tree.root);
 console.log(tree.depth(67));
 
+separator(12, 'Is balanced');
+prettyPrint(tree.root);
+console.log(tree.isBalanced());
+tree.insert(144);
+tree.insert(81);
+tree.insert(36);
+prettyPrint(tree.root);
+console.log(tree.isBalanced());
